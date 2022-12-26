@@ -64,7 +64,7 @@ class NFG:
         return (
             self._flatten_grad_operator_pseudo_inv if comp == self._is_comparable_strategy_profile
             else self._flatten_m_grad_operators_pseudo_invs[comp_extra_param] if comp == self._is_m_comparable_strategy_profile
-            else self._flatten_grad_operator_pseudo_inv_without_comparation
+            else self._flatten_grad_operator_pseudo_inv_without_comparability_check
         )
     
     # 在可比较的策略组合之间计算离散梯度
@@ -120,7 +120,7 @@ class NFG:
         
         self._flatten_grad_operator = np.concatenate(blocks, axis=0) 
         
-        self._flatten_grad_operator_pseudo_inv_without_comparation = np.linalg.pinv(self._flatten_grad_operator)
+        self._flatten_grad_operator_pseudo_inv_without_comparability_check = np.linalg.pinv(self._flatten_grad_operator)
         
         self._flatten_grad_operator *= self._comparable_matrix.flatten().reshape(-1, 1)
         
