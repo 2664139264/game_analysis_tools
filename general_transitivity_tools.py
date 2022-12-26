@@ -26,6 +26,8 @@ class NFG:
         self._ones_vertical = np.ones(shape=(self._utilities_size, 1), dtype=np.int32)
         self._ones_horizontal = self._ones_vertical.T  
         
+        self._e_u = np.eye(self._utilities_size)
+        
         # 计算所有需要用到的矩阵
         self._precalculate_matrices()      
         
@@ -54,7 +56,7 @@ class NFG:
         return (
             self._comparable_matrix if comp == self._is_comparable_strategy_profile 
             else self._m_comparable_matrices[comp_extra_param] if comp == self._is_m_comparable_strategy_profile
-            else np.eye(self._utilities_size)
+            else self._e_u
         )
     
     # 选择梯度算子伪逆矩阵
@@ -62,7 +64,7 @@ class NFG:
         return (
             self._flatten_grad_operator_pseudo_inv if comp == self._is_comparable_strategy_profile
             else self._flatten_m_grad_operators_pseudo_invs[comp_extra_param] if comp == self._is_m_comparable_strategy_profile
-            else np.eye(self._utilities_size, self._utilities_size**2)
+            else self._flatten_grad_operator_pseudo_inv_without_comparation
         )
     
     # 在可比较的策略组合之间计算离散梯度
@@ -108,16 +110,19 @@ class NFG:
         self._comparable_matrix = np.sum(self._m_comparable_matrices, axis=0)
         
         # 构造梯度算子矩阵（将像的矩阵空间展平为向量空间）
-        e_u = np.eye(self._utilities_size)
         
         blocks = np.fromfunction(
             np.vectorize(
-                lambda i: e_u - np.repeat(e_u[i].reshape(1, -1), self._utilities_size, axis=0),
+                lambda i: self._e_u - np.repeat(self._e_u[i].reshape(1, -1), self._utilities_size, axis=0),
                 signature=f'()->({self._utilities_size},{self._utilities_size})'
             ), shape=(self._utilities_size,), dtype=np.int32
         )
-                        
-        self._flatten_grad_operator = np.concatenate(blocks, axis=0) * self._comparable_matrix.flatten().reshape(-1, 1)
+        
+        self._flatten_grad_operator = np.concatenate(blocks, axis=0) 
+        
+        self._flatten_grad_operator_pseudo_inv_without_comparation = np.linalg.pinv(self._flatten_grad_operator)
+        
+        self._flatten_grad_operator *= self._comparable_matrix.flatten().reshape(-1, 1)
         
         self._flatten_m_grad_operators = [
             self._flatten_grad_operator * self._m_comparable_matrices[i].flatten().reshape(-1, 1)
