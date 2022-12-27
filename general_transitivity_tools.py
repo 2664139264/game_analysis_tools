@@ -52,7 +52,7 @@ class NFG:
         )
     
     # 选择比较矩阵
-    def _select_comp_matrix(self, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def _select_comp_matrix(self, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         return (
             self._comparable_matrix if comp == self._is_comparable_strategy_profile 
             else self._m_comparable_matrices[comp_extra_param] if comp == self._is_m_comparable_strategy_profile
@@ -60,7 +60,7 @@ class NFG:
         )
     
     # 选择梯度算子伪逆矩阵
-    def _select_flatten_grad_pseudo_inv_matrix(self, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def _select_flatten_grad_pseudo_inv_matrix(self, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         return (
             self._flatten_grad_operator_pseudo_inv if comp == self._is_comparable_strategy_profile
             else self._flatten_m_grad_operators_pseudo_invs[comp_extra_param] if comp == self._is_m_comparable_strategy_profile
@@ -69,7 +69,7 @@ class NFG:
     
     # 在可比较的策略组合之间计算离散梯度
     # potential的维度为: (策略组合数,)
-    def grad(self, potential:np.ndarray, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def grad(self, potential:np.ndarray, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         comp_matrix = self._select_comp_matrix(comp, comp_extra_param)
         
         return (
@@ -79,18 +79,18 @@ class NFG:
     
     # grad算子的伪逆
     # flow的维度为: (策略组合数,策略组合数)
-    def grad_pseudo_inv(self, flow:np.ndarray, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def grad_pseudo_inv(self, flow:np.ndarray, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         grad_pseudo_inv_matrix = self._select_flatten_grad_pseudo_inv_matrix(comp, comp_extra_param)
         return grad_pseudo_inv_matrix @ flow.flatten()
         
     # 梯度的伴随算子：散度
     # flow的维度：(策略组合数,策略组合数)
-    def div(self, flow:np.ndarray, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def div(self, flow:np.ndarray, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         comp_matrix = self._select_comp_matrix(comp, comp_extra_param)
         return (flow.T * comp_matrix.T).sum(axis=0) - (flow * comp_matrix).sum(axis=1)
     
     # 投影算子，向non-strategic的正交补空间投影
-    def pi(self, potential:np.ndarray, comp:Callable=None, comp_extra_param=None) -> np.ndarray:
+    def pi(self, potential:np.ndarray, comp:Callable=None, comp_extra_param:int=None) -> np.ndarray:
         return self.grad_pseudo_inv(self.grad(potential, comp, comp_extra_param), comp, comp_extra_param)
     
     # 提前计算需要用到的矩阵
