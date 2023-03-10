@@ -1,0 +1,8 @@
+author: wangyongyi@pku.edu.cn
+
+This repository provides NFG (normal form game) analytical tools, which decompose a NFG into Harmonic, Potential and Non-strategic components.
+
+For the definition of Harmonic, Potential and Non-strategic components, please refer to
+
+"Flows and Decompositions of Games, Harmonic and Potential Games" 
+MIT, Parblo A. Parrilo, Ozan Candogan, Ishai Menache, Asu Ozdag. ICIAM 2011
